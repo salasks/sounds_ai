@@ -1,5 +1,9 @@
 # https://www.youtube.com/watch?v=MhOdbtPhbLU
 # see if I can get one of these for conv layers
+import numpy as np
+import glob
+import librosa
+import os
 def extract_feature(file_name):
     X, sample_rate = librosa.load(file_name)
     # spectogram with shape 60 and 100
@@ -21,8 +25,10 @@ def extract_feature(file_name):
 
 def parse_audio_files(parent_dir,sub_dirs,file_ext="*.wav"):
     features, labels = None, np.empty(0)
+    files = []
     for label, sub_dir in enumerate(sub_dirs):
         for fn in glob.glob(os.path.join(parent_dir, sub_dir, file_ext)):
+            files.append(fn)
             try:
                 logspec = extract_feature(fn)
             except Exception as e:
@@ -33,7 +39,7 @@ def parse_audio_files(parent_dir,sub_dirs,file_ext="*.wav"):
             else:
                 features = np.concatenate((features,logspec), axis=0)
             labels = np.append(labels, fn.split('/')[2].split('-')[1])
-    return np.array(features), np.array(labels, dtype = np.int)
+    return np.array(features), np.array(labels, dtype = np.int),files
 
 def one_hot_encode(labels):
     n_labels = len(labels)
